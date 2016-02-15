@@ -68,11 +68,9 @@ Vagrant.configure(2) do |config|
   #   sudo apt-get update
   #   sudo apt-get install -y apache2
   # SHELL
-  config.vm.provision "chef_zero" do |chef|
-    # Specify the local paths where Chef data is stored
-    chef.cookbooks_path = "Build/Vagrant/CookBooks"
+  config.vm.provision :puppet do |puppet|
 
-    # Add a recipe
-    chef.add_recipe "calbender_server"
+    puppet.environment_path = "Build/Puppet"
+    puppet.environment = "dev"
   end
 end
