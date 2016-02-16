@@ -10,12 +10,8 @@ Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
     require => Exec['apt-get update'],
   }
 
-package { "apache2":
-ensure  => present,
+class { 'apache': 
+	docroot => '/vagrant/Source'
 }
 
-service { "apache2":
-ensure  => "running",
-require => Package["apache2"],
-}
-
+include apache
