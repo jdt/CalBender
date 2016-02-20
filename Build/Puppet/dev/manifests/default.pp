@@ -1,19 +1,17 @@
+#define where to look for executed commands
 Exec 
 { 
 	path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] 
 }
   
-exec
-{
-	'apt-get update': command => 'apt-get update'
+#run apt-get update
+exec 
+{ 'system-update':
+	command => 'sudo apt-get update'
 }
 
-$sysPackages = [ "build-essential" ]
-package 
-{ 
-	$sysPackages: ensure => "installed",
-	require => Exec['apt-get update'],
-}
+#and always run apt-get update prior to package installation
+Exec['system-update'] -> Package <| |>
 
 class 
 { 
