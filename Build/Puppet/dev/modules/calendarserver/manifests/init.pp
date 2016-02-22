@@ -1,4 +1,7 @@
-class calendarserver 
+class calendarserver
+(
+	$auth_basic_enabled		= params_lookup('auth_basic_enabled')
+) inherits calendarserver::params
 {
 	package 
 	{ 
@@ -26,10 +29,17 @@ class calendarserver
 			content => template('calendarserver/calendarserver.erb')
 	}
 
+	file
+	{
+		'/etc/caldavd/caldavd.plist':
+			ensure  => file,
+			content => template('calendarserver/caldavd.plist.erb')
+	}
+
 	service 
 	{ 
 		"calendarserver":
     		ensure => running,
-    		subscribe => File["/etc/default/calendarserver"]
+    		subscribe => File["/etc/default/calendarserver", "/etc/caldavd/caldavd.plist"]
 	}
 }
