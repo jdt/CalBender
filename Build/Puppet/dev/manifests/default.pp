@@ -23,3 +23,19 @@ apache::vhost
   priority => '',
   docroot => '/vagrant/Source'
 }
+
+class
+{
+	'php':
+}
+
+class 
+{ 
+	'composer':
+}
+
+class
+{
+	'calendarserver':
+		auth_basic_enabled => 'true'
+}
