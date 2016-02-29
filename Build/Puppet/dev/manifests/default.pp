@@ -21,7 +21,7 @@ class
 apache::vhost 
 { 'default':
   priority => '',
-  docroot => '/vagrant/Source'
+  docroot => '/vagrant/Source/web'
 }
 
 class
