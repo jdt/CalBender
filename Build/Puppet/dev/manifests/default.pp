@@ -34,6 +34,11 @@ class
 	'composer':
 }
 
+class 
+{ 
+	'phpunit':
+}
+
 class
 {
 	'calendarserver':
