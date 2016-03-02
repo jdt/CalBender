@@ -1,4 +1,33 @@
 class php {
+  file_line { 'deb wheezy all':
+    path  => '/etc/apt/sources.list',
+    line  => 'deb http://packages.dotdeb.org wheezy all'
+  }
+  file_line { 'deb-src wheezy all':
+    path  => '/etc/apt/sources.list',
+    line  => 'deb-src http://packages.dotdeb.org wheezy all'
+  }
+  file_line { 'deb wheezy php5 all':
+    path  => '/etc/apt/sources.list',
+    line  => 'deb http://packages.dotdeb.org wheezy-php56 all'
+  }
+  file_line { 'deb-src wheezy php5 all':
+    path  => '/etc/apt/sources.list',
+    line  => 'deb-src http://packages.dotdeb.org wheezy-php56 all'
+  }
+
+  exec { 'get gpg':
+    command => "wget https://www.dotdeb.org/dotdeb.gpg"
+  }
+
+  exec { 'apt-key gpg':
+    command => "apt-key add dotdeb.gpg"
+  }
+
+  exec { 'update':
+    command => "apt-get update"
+  }
+
   package { "php5":
     ensure  => latest,
   }
