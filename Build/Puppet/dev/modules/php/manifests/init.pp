@@ -63,4 +63,8 @@ class php {
     line  => 'date.timezone = UTC',
     match => '^;date.timezone ='
   }
+
+  exec { 'enable php5 module':
+    command => "cp /etc/apache2/mods-available/php5.* /etc/apache2/mods-enabled/"
+  }
 }
