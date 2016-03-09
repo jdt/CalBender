@@ -1,0 +1,25 @@
+{
+	"data":
+	[
+		{
+			"type": "events",
+			"id": "id1",
+			"attributes":
+			{
+				"description": "Test 1",
+				"from": "20160307100000",
+				"to": "20160307120000"
+			}
+		},
+		{
+			"type": "events",
+			"id": "id2",
+			"attributes":
+			{
+				"description": "Test 2",
+				"from": "20160319200000",
+				"to": "20160320020000"
+			}
+		}
+	]
+}
