@@ -1,7 +1,9 @@
 <?php
 namespace AppBundle\Repository;
 
+use \DateTime;
+
 interface ICalDavServer
 {
-	function getEvents(DateTime $from, DateTime $to);
+	function selectEvents(DateTime $from, DateTime $to);
 }
