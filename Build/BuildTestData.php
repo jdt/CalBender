@@ -2,121 +2,62 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-class TestDataBuilder
+require_once('../Source/vendor/autoload.php');
+
+use Sabre\VObject\Component\VCalendar;
+
+function getClient()
 {
-	private $baseUrl = "http://localhost:8008/calendars/users/test/calendar/";
-	private $userpwd = "test:test";	
-
-	private function DoRequest($id, $method, $body)
-	{
-		$url = $this->baseUrl.$id.".ics";
-
-		$headers = array(
-			'Content-Type: text/calendar; charset=utf-8',
-			'Expect: '
-		);
-
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-
-		if($body != "")
-		{
-			$headers[] = 'Content-Length: '.strlen($body);
-			$headers[] = 'If-None-Match: *';
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-		}
-
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$output = curl_exec($ch);
-		if($output === false)
-		{
-		    echo 'Curl error: ' . curl_error($ch).PHP_EOL;
-		}
-
-		curl_close($ch);
-	}
-
-	public function CreateEvent($id, $description, $from, $to)
-	{
-		$formattedFrom = $from->format("Ymd\THis");
-		$formattedTo = $to->format("Ymd\THis");
-
-		$body = <<<__EOD
-BEGIN:VCALENDAR
-PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN
-VERSION:2.0
-BEGIN:VTIMEZONE
-TZID:Europe/Paris
-BEGIN:DAYLIGHT
-TZOFFSETFROM:+0100
-TZOFFSETTO:+0200
-TZNAME:CEST
-DTSTART:19700329T020000
-RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
-END:DAYLIGHT
-END:VTIMEZONE
-BEGIN:VEVENT
-DTSTAMP:20160306T105816Z
-DTSTART;TZID=Europe/Paris:$formattedFrom
-DTEND;TZID=Europe/Paris:$formattedTo
-UID:$id
-SUMMARY:$description
-END:VEVENT
-END:VCALENDAR
-__EOD;
-
-		$this->DoRequest($id, "PUT", $body);
-	}
-
-	public function DeleteEvent($id)
-	{
-		$this->DoRequest($id, "DELETE", "");
-	}
-
-	public function DeleteAllEvents()
-	{	
-		$headers = array(
-			'Content-Type: text/calendar; charset=utf-8',
-			'Expect: '
-		);
-
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $this->baseUrl);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$output = curl_exec($ch);
-		curl_close($ch);
-
-		$data = explode(PHP_EOL, $output);
-
-		$uids = array();
-		foreach($data as $key => $line)
-		{
-			if(substr($line, 0, strlen("UID:")) === "UID:")
-			{
-				$uids[] = substr($line, 4, -1);
-			}
-		}
-
-		foreach($uids as $id)
-		{
-			$this->DeleteEvent($id."");
-		}
-	}
+	$client = new SimpleCalDAVClient();
+	$client->connect("http://localhost:8008/calendars/users/test/calendar/", "test", "test");
+	$arrayOfCalendars = $client->findCalendars();
+	$client->setCalendar($arrayOfCalendars["calendar"]);
+	return $client;
 }
 
 
-$builder = new TestDataBuilder();
-$builder->DeleteAllEvents();
-$builder->CreateEvent("id1", "Test 1", new DateTime("2016-03-07 10:00:00"), new DateTime("2016-03-07 12:00:00"));
-$builder->CreateEvent("id2", "Test 2", new DateTime("2016-03-19 20:00:00"), new DateTime("2016-03-20 02:00:00"));
+$events = getClient()->getEvents("19000101T000000Z", "20991231T235959Z");
+
+while(count($events) > 0)
+{
+	getClient()->delete($events[0]->getHref(), $events[0]->getEtag());
+	$events = getClient()->getEvents("19000101T000000Z", "20991231T235959Z");
+}
+
+
+$test1 = new VCalendar([
+    'VEVENT' => [
+        'SUMMARY' => 'Test 1',
+        'DTSTART' => new \DateTime('2016-03-07 10:00:00'),
+        'DTEND'   => new \DateTime('2016-03-07 12:00:00')
+    ]
+]);
+
+$test2 = new VCalendar([
+    'VEVENT' => [
+        'SUMMARY' => 'Test 2',
+        'DTSTART' => new \DateTime('2016-03-07 12:00:00'),
+        'DTEND'   => new \DateTime('2016-03-07 14:00:00')
+    ]
+]);
+
+$test3 = new VCalendar([
+    'VEVENT' => [
+        'SUMMARY' => 'Test 3',
+        'DTSTART' => new \DateTime('2016-03-07 12:00:00'),
+        'DTEND'   => new \DateTime('2016-03-07 15:00:00')
+    ]
+]);
+
+$test4 = new VCalendar([
+    'VEVENT' => [
+        'SUMMARY' => 'Test 4',
+        'DTSTART' => new \DateTime('2016-03-07 16:00:00'),
+        'DTEND'   => new \DateTime('2016-03-07 18:00:00')
+    ]
+]);
+
+getClient()->create($test1->serialize());
+getClient()->create($test2->serialize());
+getClient()->create($test3->serialize());
+getClient()->create($test4->serialize());
